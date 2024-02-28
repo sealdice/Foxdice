@@ -79,7 +79,7 @@ type StdEvent struct {
 	// 事件类型
 	Type EventType
 	// 消息元素
-	Elements []Element
+	Elements []*Element
 	// Endpoint
 	Endpoint *Endpoint
 }

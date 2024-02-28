@@ -18,6 +18,6 @@ func (e *Extension) NewCommand(name string) Command {
 	return cmd
 }
 
-func (e *Extension) Reg(m map[string]*Caption) {
+func (e *Extension) RegConfig(m map[string]*Caption) {
 
 }

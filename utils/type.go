@@ -36,4 +36,5 @@ type IConfig interface {
 	Unmarshal(path string, o any) error
 	Exists(path string) bool
 	Set(path string, a any) error
+	Sub(path string) IConfig
 }

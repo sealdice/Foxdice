@@ -28,7 +28,8 @@ func main() {
 	db, _ := Connect(k.MustString("db.driver"), k.String("dsn"))
 
 	// 连接机器人
-	m := core.InitManager(koanf.New("core"), log)
+	m := core.InitManager(NewConfig("core"), log)
+
 	core.DefaultHandler()
 	admin.Build(m, db)
 	trpg.BuildCOC7(m)
@@ -51,5 +52,5 @@ func main() {
 	go core.Serve(context.TODO())
 
 	// 服务启动
-	serve.Serve(koanf.New("serve"), log)
+	serve.Serve(NewConfig("serve"), log)
 }
