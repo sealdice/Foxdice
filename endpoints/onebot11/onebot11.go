@@ -2,11 +2,11 @@ package onebot11
 
 import (
 	"context"
-	"foxdice/endpoints/im"
-	"foxdice/utils/syncx"
 	"net/http"
 
-	"github.com/sacOO7/gowebsocket"
+	"foxdice/endpoints/im"
+	"foxdice/utils/syncx"
+	"foxdice/utils/websocket"
 )
 
 const (
@@ -23,7 +23,7 @@ func New(ep *im.Endpoint) {
 
 type Adapter struct {
 	im.EmptyAdapter
-	socket          gowebsocket.Socket
+	socket          websocket.Socket
 	httpServer      http.Server
 	httpClient      http.Client
 	echo            syncx.RWMap[string, chan *RetData]
@@ -33,6 +33,10 @@ type Adapter struct {
 	AccessToken     string
 	Mode            string
 	UseArrayMessage bool
+}
+
+func implementationAdapter(a *Adapter) {
+	a.Endpoint.Platform = im.QQ // ob11 目前有 QQ 平台以外的实现吗
 }
 
 func (a *Adapter) Serve(ctx context.Context, ch chan<- *im.Event) {

@@ -2,97 +2,10 @@ package onebot11
 
 import (
 	"encoding/json"
+
 	"foxdice/endpoints/im"
 	"foxdice/utils"
-	"regexp"
 )
-
-func (a *Adapter) parseMessage(s []byte, e *im.Event) bool {
-	if !a.UseArrayMessage {
-		msg := new(MessageCQCode)
-		err := json.Unmarshal(s, msg)
-		if err != nil {
-			a.Endpoint.Error("解析 OneBot11 CQ 码类型的消息失败", err)
-			a.Endpoint.Info("将尝试作为数组类型的消息解析")
-			a.UseArrayMessage = true
-			goto Array
-		}
-		longText := msg.Message
-		re := regexp.MustCompile(`\[CQ:.+?]`)
-		m := re.FindAllStringIndex(msg.Message, -1)
-		newText := msg.Message
-		var arr []any
-
-		for i := len(m) - 1; i >= 0; i-- {
-			p := m[i]
-			cq := CQParse(longText[p[0]:p[1]])
-
-			// 如果尾部有文本，将其拼入数组
-			endText := newText[p[1]:]
-			if len(endText) > 0 {
-				i := OneBotV11ArrMsgItem[OneBotV11MsgItemTextType]{Type: "text", Data: OneBotV11MsgItemTextType{Text: endText}}
-				arr = append(arr, i)
-			}
-
-			// 将 CQ 拼入数组
-			switch cq.Type {
-			case "image":
-				i := OneBotV11ArrMsgItem[OneBotV11MsgItemImageType]{Type: "image", Data: OneBotV11MsgItemImageType{File: cq.Args["file"]}}
-				arr = append(arr, i)
-			case "record":
-				i := OneBotV11ArrMsgItem[OneBotV11MsgItemRecordType]{Type: "record", Data: OneBotV11MsgItemRecordType{File: cq.Args["file"]}}
-				arr = append(arr, i)
-			case "at":
-				// [CQ:at,qq=10001000]
-				i := OneBotV11ArrMsgItem[OneBotV11MsgItemAtType]{Type: "at", Data: OneBotV11MsgItemAtType{QQ: cq.Args["qq"]}}
-				arr = append(arr, i)
-			default:
-				data := make(map[string]interface{})
-				for k, v := range cq.Args {
-					data[k] = v
-				}
-				i := OneBotV11MsgItem{Type: cq.Type, Data: data}
-				arr = append(arr, i)
-			}
-
-			newText = newText[:p[0]]
-		}
-
-		// 如果剩余有文本，将其拼入数组
-		if len(newText) > 0 {
-			i := OneBotV11ArrMsgItem[OneBotV11MsgItemTextType]{Type: "text", Data: OneBotV11MsgItemTextType{Text: newText}}
-			arr = append(arr, i)
-		}
-
-	}
-Array:
-	msg := new(MessageArray)
-	err := json.Unmarshal(s, msg)
-	if err != nil {
-		a.Endpoint.Error("解析 OneBot11 数组类型的消息失败", err)
-		return false
-	}
-
-	for _, m := range msg.Message {
-		switch m.Type {
-		case "text":
-			e.Elements = append(e.Elements, &im.Element{Type: im.TextElement, Data: m.Data["text"]})
-		case "image":
-			e.Elements = append(e.Elements, &im.Element{Type: im.ImgElement, Data: m.Data["file"]})
-		case "face":
-			e.Elements = append(e.Elements, &im.Element{Type: im.TextElement, Data: m.Data["id"]})
-		case "record":
-			e.Elements = append(e.Elements, &im.Element{Type: im.TextElement, Data: m.Data["file"]})
-		case "at":
-			e.Elements = append(e.Elements, &im.Element{Type: im.AtElement, Data: m.Data["qq"]})
-		case "poke":
-			e.Elements = append(e.Elements, &im.Element{Type: im.TextElement, Data: m.Data["poke"]})
-		case "reply":
-			e.Elements = append(e.Elements, &im.Element{Type: im.TextElement, Data: m.Data["id"]})
-		}
-	}
-	return true
-}
 
 func (a *Adapter) parseEvent(msg []byte) (*im.Event, *Event) {
 	obe := new(Event)
@@ -105,7 +18,7 @@ func (a *Adapter) parseEvent(msg []byte) (*im.Event, *Event) {
 	switch obe.PostType {
 	case "message":
 		event.Type = utils.MessageEvent
-		if ok := a.parseMessage(msg, event); ok == false {
+		a.parseMessage(msg, event); ok == false {
 			return nil, nil
 		}
 		switch obe.MessageType {
@@ -252,55 +165,4 @@ type Event struct {
 	Msg string `json:"msg"`
 	// Status  interface{} `json:"status"`
 	Wording string `json:"wording"`
-}
-
-// https://github.com/botuniverse/onebot-11/blob/master/message/array.md
-
-type OneBotV11MsgItemTextType struct {
-	Text string `json:"text"`
-}
-
-type OneBotV11MsgItemImageType struct {
-	File string `json:"file"`
-}
-
-type OneBotV11MsgItemFaceType struct {
-	Id string `json:"id"`
-}
-
-type OneBotV11MsgItemRecordType struct {
-	File string `json:"file"`
-}
-
-type OneBotV11MsgItemAtType struct {
-	QQ string `json:"qq"`
-}
-
-type OneBotV11MsgItemPokeType struct {
-	Type string `json:"type"`
-	Id   string `json:"id"`
-}
-
-type OneBotV11MsgItemReplyType struct {
-	Id string `json:"id"`
-}
-
-type OneBotV11MsgItem struct {
-	Type string                 `json:"type"`
-	Data map[string]interface{} `json:"data"`
-}
-
-type OneBotV11ArrMsgItem[T any] struct {
-	Type string `json:"type"`
-	Data T      `json:"data"`
-}
-
-type MessageArray struct {
-	Event
-	Message []*OneBotV11MsgItem `json:"message"` // 消息内容
-}
-
-type MessageCQCode struct {
-	Event
-	Message string `json:"message"` // 消息内容
 }

@@ -104,14 +104,6 @@ type Event struct {
 	TargetUser User
 }
 
-// Encode 根据 StdEvent.Elements 编码到 Message.Content
-func (e *Event) Encode() {
-}
-
-// Decode 根据 Message.Content 编码到 StdEvent.Elements
-func (e *Event) Decode() {
-}
-
-func (e *Event) CloneId() *Event {
-	return &Event{}
+func (e *Event) Append(el *Element) {
+	e.Elements = append(e.Elements, el)
 }

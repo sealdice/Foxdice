@@ -4,26 +4,18 @@ import (
 	"context"
 
 	"foxdice/endpoints/im"
-
-	"github.com/sacOO7/gowebsocket"
+	"foxdice/utils/websocket"
 )
 
 func (a *Adapter) websocket(ctx context.Context, ch chan<- *im.Event) {
-	socket := gowebsocket.New(a.ConnectURL)
-	socket.OnPingReceived = func(data string, socket gowebsocket.Socket) {
-		a.Endpoint.Debug("[ping] " + data)
-	}
-	socket.OnPongReceived = func(data string, socket gowebsocket.Socket) {
-		a.Endpoint.Debug("[pong] " + data)
-	}
-	socket.OnDisconnected = func(err error, socket gowebsocket.Socket) {
+	socket := websocket.New(a.ConnectURL, a.Endpoint.ILogger)
+	socket.OnDisconnected = func(err error) {
 		a.Endpoint.Info("OneBot 服务的连接被关闭")
 	}
-	socket.OnConnected = func(socket gowebsocket.Socket) {
-		ret := a.getVersionInfo()
-		a.Implementation.AppName = ret.AppName
+	socket.OnConnected = func(socket websocket.Socket) {
+		implementationAdapter(a)
 	}
-	socket.OnBinaryMessage = func(msg []byte, socket gowebsocket.Socket) {
+	socket.OnBinaryMessage = func(msg []byte) {
 		e, obe := a.parseEvent(msg)
 		if obe.Status != "" {
 			if ch2, ok := a.echo.Load(obe.Echo); ok {
