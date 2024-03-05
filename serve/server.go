@@ -22,7 +22,7 @@ func Serve(config utils.IConfig, logger utils.ILogger) {
 		web.StaticFS("/", ui.NavAndDoc)
 	}
 	web.StaticFS("/doc", ui.NavAndDoc)
-	web.StaticFS("/bot", ui.Bot)
+	web.StaticFS("/bot", ui.Admin)
 	bindAPI(web.Group("/api"))
 	port := config.String("server.port")
 	logger.Infof("服务开启于 %s", port)

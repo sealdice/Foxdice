@@ -1,2 +1,4 @@
 packages:
-  - 'pkg/**'
+  - 'demo'
+  - 'nav'
+  - 'admin'

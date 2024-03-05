@@ -3,9 +3,10 @@ package ui
 import "embed"
 
 var (
-	//go:embed all:pkg/nav/dist
+	//go:embed all:nav/dist
 	NavAndDoc embed.FS
-	//go:embed all:pkg/demo/dist
+	//go:embed all:demo/dist
 	Demo embed.FS
-	Bot  embed.FS
+	//go:embed all:admin/dist/spa
+	Admin embed.FS
 )
