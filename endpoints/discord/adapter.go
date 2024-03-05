@@ -2,30 +2,34 @@ package discord
 
 import (
 	"context"
-	"foxdice/endpoints/im"
 	"net/http"
 	"net/url"
 	"time"
 
+	"foxdice/endpoints/im"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/gorilla/websocket"
 )
+
+func New() (string, im.AdapterBuilder) {
+	return im.Discord, func(ep *im.Endpoint) *im.Endpoint {
+		a := &Adapter{
+			EmptyAdapter: im.EmptyAdapter{Endpoint: ep},
+		}
+		a.Token = ep.String(ep.Id + ".token")
+		a.ProxyURL = ep.String(ep.Id + ".proxy_url")
+		a.Endpoint = ep
+		ep.Adapter = a
+		return ep
+	}
+}
 
 type Adapter struct {
 	im.EmptyAdapter
 	Session  *discordgo.Session
 	Token    string
 	ProxyURL string
-}
-
-func Attach(ep *im.Endpoint) {
-	a := &Adapter{
-		EmptyAdapter: im.EmptyAdapter{Endpoint: ep},
-	}
-	a.Token = ep.String(ep.Id + ".token")
-	a.ProxyURL = ep.String(ep.Id + ".proxy_url")
-	a.Endpoint = ep
-	ep.Adapter = a
 }
 
 func (a *Adapter) Serve(ctx context.Context, ch chan<- *im.Event) {

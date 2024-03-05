@@ -3,8 +3,9 @@ package core
 import (
 	"context"
 	"errors"
-	"foxdice/utils"
 	"sync"
+
+	"foxdice/utils"
 )
 
 func NewManager(config utils.IConfig, logger utils.ILogger) *Manager {

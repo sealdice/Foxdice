@@ -4,23 +4,27 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"foxdice/endpoints/im"
 	"os"
 	"strings"
+
+	"foxdice/endpoints/im"
 )
 
-func New(ep *im.Endpoint) {
-	ep.LoginInfo = im.LoginInfo{
-		Status:   im.Offline,
-		SelfId:   im.Cli,
-		Name:     im.Cli,
-		Platform: im.Cli,
-	}
-	ep.Adapter = &Adapter{
-		EmptyAdapter: im.EmptyAdapter{Endpoint: ep},
-		uid:          "1",
-		cid:          "1",
-		gid:          "1",
+func New() (string, im.AdapterBuilder) {
+	return im.Cli, func(ep *im.Endpoint) *im.Endpoint {
+		ep.LoginInfo = im.LoginInfo{
+			Status:   im.Offline,
+			SelfId:   im.Cli,
+			Name:     im.Cli,
+			Platform: im.Cli,
+		}
+		ep.Adapter = &Adapter{
+			EmptyAdapter: im.EmptyAdapter{Endpoint: ep},
+			uid:          "1",
+			cid:          "1",
+			gid:          "1",
+		}
+		return ep
 	}
 }
 

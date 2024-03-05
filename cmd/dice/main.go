@@ -5,6 +5,9 @@ import (
 	"fmt"
 
 	"foxdice/core"
+	"foxdice/endpoints/cli"
+	"foxdice/endpoints/discord"
+	"foxdice/endpoints/onebot11"
 	"foxdice/extensions/admin"
 	"foxdice/extensions/draw"
 	"foxdice/extensions/trpg"
@@ -30,6 +33,9 @@ func main() {
 
 	// 连接机器人
 	m := core.InitManager(NewConfig("core"), log)
+	m.Hub.RegAdapter(cli.New())
+	m.Hub.RegAdapter(discord.New())
+	m.Hub.RegAdapter(onebot11.New())
 
 	core.DefaultHandler()
 	admin.Build(m, db)

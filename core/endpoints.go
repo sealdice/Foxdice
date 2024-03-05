@@ -3,8 +3,7 @@ package core
 import (
 	"context"
 	"errors"
-	"foxdice/endpoints/cli"
-	"foxdice/endpoints/discord"
+
 	"foxdice/endpoints/im"
 	"foxdice/utils"
 	"foxdice/utils/str"
@@ -15,11 +14,16 @@ import (
 type Hub struct {
 	Publish               chan *im.Event
 	Source                chan *im.Event
+	adapters              map[string]im.AdapterBuilder
 	Endpoints             []*im.Endpoint
 	startCompletionSignal chan struct{}
 	serveCtx              context.Context
 	Config                utils.IConfig
 	Logger                utils.ILogger
+}
+
+func (h *Hub) RegAdapter(platform string, ab im.AdapterBuilder) {
+	h.adapters[platform] = ab
 }
 
 func (h *Hub) Serve(ctx context.Context) {
@@ -30,19 +34,12 @@ func (h *Hub) Serve(ctx context.Context) {
 		h.Logger.Error(err)
 	}
 
-	cliEp := &im.Endpoint{}
-	cli.New(cliEp)
-	go cliEp.Adapter.Serve(ctx, h.Source)
-
 	for _, b := range list {
 		ep := new(im.Endpoint)
 		ep.LoginInfo = b
 		ep.IConfig = h.Config
 		ep.ILogger = h.Logger
-		switch ep.Platform {
-		case im.Discord:
-			discord.Attach(ep)
-		}
+		h.adapters[ep.Platform](ep)
 		h.Endpoints = append(h.Endpoints, ep)
 		go func() {
 			defer utils.ErrorPrint()

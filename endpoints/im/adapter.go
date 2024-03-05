@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+type AdapterBuilder = func(ep *Endpoint) *Endpoint
+
 // Adapter 最基本适配器实现 收发消息
 type Adapter interface {
 	Serve(ctx context.Context, ch chan<- *Event)

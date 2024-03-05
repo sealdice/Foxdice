@@ -9,16 +9,21 @@ import (
 	"foxdice/utils/websocket"
 )
 
+const Name = "OneBot11"
+
 const (
 	WsMode        = "ws"
 	HttpMode      = "http"
 	WsReverseMode = "ws-reverse"
 )
 
-func New(ep *im.Endpoint) {
-	adapter := new(Adapter)
-	_ = ep.Unmarshal("config", adapter)
-	adapter.Endpoint = ep
+func New() (string, im.AdapterBuilder) {
+	return Name, func(ep *im.Endpoint) *im.Endpoint {
+		adapter := new(Adapter)
+		_ = ep.Unmarshal("config", adapter)
+		adapter.Endpoint = ep
+		return ep
+	}
 }
 
 type Adapter struct {
