@@ -8,22 +8,22 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-var (
-	web *echo.Echo
-)
-
 func Serve(config utils.IConfig, logger utils.ILogger) {
-	web = echo.New()
+	web := echo.New()
 	web.HideBanner = true
 	web.HidePort = true
 	c := middleware.DefaultLoggerConfig
 	c.Output = eLog{logger}
 	web.Use(middleware.LoggerWithConfig(c))
 	web.Use(middleware.Recover())
-
-	web.StaticFS("/", ui.Main)
-	web.StaticFS("/bots", ui.Bots)
-
+	if true {
+		web.StaticFS("/", ui.Demo)
+	} else {
+		web.StaticFS("/", ui.NavAndDoc)
+	}
+	web.StaticFS("/doc", ui.NavAndDoc)
+	web.StaticFS("/bot", ui.Bot)
+	bindAPI(web.Group("/api"))
 	port := config.String("server.port")
 	logger.Infof("服务开启于 %s", port)
 	logger.Fatal(web.Start(":" + port))

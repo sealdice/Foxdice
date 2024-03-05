@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"foxdice/core"
 	"foxdice/extensions/admin"
 	"foxdice/extensions/draw"
@@ -18,7 +19,7 @@ import (
 
 func main() {
 	k := koanf.New(".")
-	err := k.Load(file.Provider("mock/mock.json"), toml.Parser())
+	err := k.Load(file.Provider(utils.DataDir("config.toml")), toml.Parser())
 	if err != nil {
 		fmt.Println()
 		panic(err)

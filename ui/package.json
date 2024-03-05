@@ -1,0 +1,12 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "description": "目前仅仅是方便一建安装和构建",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r --filter=./pkg/* run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
